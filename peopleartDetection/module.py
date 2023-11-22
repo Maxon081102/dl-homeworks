@@ -4,7 +4,7 @@ import pytorch_lightning as L
 from torch import nn, Tensor
 from torch.nn import functional as F
 from typing import Any, Callable, Optional, Union
-from lightning.pytorch.utilities.types import STEP_OUTPUT
+from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torchmetrics.detection import MeanAveragePrecision
 from torch.optim.optimizer import Optimizer
 
@@ -22,7 +22,12 @@ class PeopleArtModule(L.LightningModule):
     ) -> STEP_OUTPUT:
         x, y = batch
         res = self.model(x, y)
-        loss = res["bbox_regression"]
+        loss1 = res["bbox_regression"]
+        loss2 = res["classification"]
+
+        a = 0.9
+
+        loss = a * loss1 + (1 - a) * loss2
         
         self.log("train_loss", loss, on_step=False, on_epoch=True)
 

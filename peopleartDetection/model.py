@@ -13,13 +13,13 @@ class PeopleArtModel(nn.Module):
         self.transform = weights.transforms()
         self.model = retinanet_resnet50_fpn_v2(weights=weights)
         
-        num_anchors = self.model.head.classification_head.num_anchors
-        self.model.head.classification_head = RetinaNetClassificationHead(
-            in_channels=256,
-            num_anchors=num_anchors,
-            num_classes=1,
-            norm_layer=partial(torch.nn.GroupNorm, 32)
-        )
+        # num_anchors = self.model.head.classification_head.num_anchors
+        # self.model.head.classification_head = RetinaNetClassificationHead(
+        #     in_channels=256,
+        #     num_anchors=num_anchors,
+        #     num_classes=2,
+        #     norm_layer=partial(torch.nn.GroupNorm, 32)
+        # )
         
 
     def forward(self, x, annotation):

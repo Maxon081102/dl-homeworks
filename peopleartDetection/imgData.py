@@ -32,16 +32,16 @@ def collate_fn(batch):
 
 def prepare_annotation(annotation):
     if "object" not in annotation:
-        return torch.zeros(0,4), torch.zeros(0, dtype=torch.int)
+        return torch.zeros(0,4), torch.zeros(0).type(torch.long)
     objects = []
     if isinstance(annotation["object"], dict):
         objects = torch.Tensor(list(map(int, annotation["object"]["bndbox"].values())))[None]
-        return objects, torch.zeros(objects.shape[0]).type(torch.int)
+        return objects, torch.ones(objects.shape[0]).type(torch.long)
     else:
         for item in annotation["object"]:
             objects.append(torch.Tensor(list(map(int, item["bndbox"].values()))))
     objects = torch.stack(objects)
-    return objects, torch.zeros(objects.shape[0]).type(torch.int)
+    return objects, torch.ones(objects.shape[0]).type(torch.long)
 
 
 class ImgData(Dataset):
@@ -91,9 +91,9 @@ class ImgDatamodule(L.LightningDataModule):
                 self.annotation_data.append(xmltodict.parse(xml.read())["annotation"])
                 self.img_names.append(img_name)
                 
-                # TODO: remove
-                if len(self.annotation_data) == 100:
-                    break
+                # # TODO: remove
+                # if len(self.annotation_data) == 100:
+                #     break
                 
         self.annotation_data = np.array(self.annotation_data)
         self.img_names = np.array(self.img_names)
@@ -103,9 +103,9 @@ class ImgDatamodule(L.LightningDataModule):
         self.train_idx = idxs[:int(0.8 * len(idxs))]
         self.val_idx = idxs[int(0.8 * len(idxs)):]
         
-        # TODO: remove
-        self.train_idx = self.train_idx[:100]
-        self.val_idx = self.val_idx[:10]
+        # # TODO: remove
+        # self.train_idx = self.train_idx[:100]
+        # self.val_idx = self.val_idx[:10]
 
     def setup(self, stage: str) -> None:
         if stage == "fit":
