@@ -91,10 +91,6 @@ class ImgDatamodule(L.LightningDataModule):
                 self.annotation_data.append(xmltodict.parse(xml.read())["annotation"])
                 self.img_names.append(img_name)
                 
-                # # TODO: remove
-                # if len(self.annotation_data) == 100:
-                #     break
-                
         self.annotation_data = np.array(self.annotation_data)
         self.img_names = np.array(self.img_names)
         
@@ -102,10 +98,6 @@ class ImgDatamodule(L.LightningDataModule):
         np.random.shuffle(idxs)
         self.train_idx = idxs[:int(0.8 * len(idxs))]
         self.val_idx = idxs[int(0.8 * len(idxs)):]
-        
-        # # TODO: remove
-        # self.train_idx = self.train_idx[:100]
-        # self.val_idx = self.val_idx[:10]
 
     def setup(self, stage: str) -> None:
         if stage == "fit":

@@ -29,7 +29,7 @@ class PeopleArtModule(L.LightningModule):
 
         loss = a * loss1 + (1 - a) * loss2
         
-        self.log("train_loss", loss, on_step=False, on_epoch=True)
+        self.log("train_loss", loss, on_step=False, on_epoch=True, batch_size=6)
 
         return loss
 
@@ -37,23 +37,20 @@ class PeopleArtModule(L.LightningModule):
         self, batch: tuple[Tensor, Tensor], batch_idx: int
     ) -> STEP_OUTPUT | None:
         x, y = batch
-        res = self.model(x, y)
-        loss = [elem["scores"].mean().item() for elem in res]
-        loss = torch.Tensor(loss).mean()
+        res = self.model.model(x)
         self.val_metrics.update(res, y)
-        self.log("val_loss", loss)
-        self.log("val_map", self.val_metrics.compute()["map"])
-
-        return {
-            "loss": loss
-            
-        }
+        self.log("val_scores", torch.Tensor([elem["scores"].mean().item() for elem in res]).mean(), on_step=False, on_epoch=True, batch_size=6)
+    
+    def on_validation_epoch_end(self):
+        val_map = self.val_metrics.compute()["map"]
+        self.log("val_map", val_map, batch_size=6)
+        self.val_metrics.reset()
 
     def configure_optimizers(self) -> dict[str, Any]:
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
         return {
             "optimizer": optimizer,
             "lr_scheduler": torch.optim.lr_scheduler.MultiStepLR(
-                optimizer, milestones=[5, 10, 15]
+                optimizer, milestones=[5, 10, 15, 20, 25]
             )
         }
